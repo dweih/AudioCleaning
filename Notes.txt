@@ -1,5 +1,0 @@
-Review pytorch tutorial
-
-Prep training data from test set
-
-Why isn't torch.cuda.is_available() true?
