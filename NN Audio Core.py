@@ -3,6 +3,11 @@
 #   NN training
 #   Evaluation & testing
 
+
+# TODO - add file name generation functions
+# TODO - figure out import in collab
+
+
 import librosa
 import numpy as np
 import cmath
@@ -15,8 +20,8 @@ WINDOW_SIZE = 55  # Has to be odd
 TARGET_COL = WINDOW_SIZE//2
 
 # stft values
-N_FFT = 2048 # 512 recommended for speech, music typically 2048
-FFT_BINS = 1025
+N_FFT = 1024 # 512 recommended for speech, music typically 2048
+FFT_BINS = 513
 
 # cqt values
 #FFT_BINS = 768 # function of items below
