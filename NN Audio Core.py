@@ -24,12 +24,13 @@ TARGET_COL = WINDOW_SIZE//2
 #FFT_BINS = 513
 
 # cqt values
-FFT_BINS = 768 # function of items below
-HOP_LENGTH = 256
+HOP_LENGTH = 128 # Required for good round trip quality
 
-BINS_PER_OCTAVE = 12 * 8
-FMIN = librosa.note_to_hz('C1')
+BINS_PER_OCTAVE = 12 * 5
+FMIN = librosa.note_to_hz('C1') # Could probably cut further up, but doesn't work in librosa
 OCTAVES = 8
+
+FFT_BINS = OCTAVES * BINS_PER_OCTAVE # function of items below
 
 
 # Shared functions
@@ -42,7 +43,8 @@ def rebuild_fft(output, original_fft):
     mag = output.T
     vrect = np.vectorize(cmath.rect)
     return vrect(mag, o_phase)
-    
+
+
 def get_ft(wav):
     c = librosa.cqt(wav, hop_length=HOP_LENGTH, fmin=FMIN, n_bins=OCTAVES*BINS_PER_OCTAVE, bins_per_octave=BINS_PER_OCTAVE)
     #c = librosa.stft(wav, hop_length=HOP_LENGTH, n_fft=N_FFT)
@@ -62,6 +64,21 @@ def diff_ft(ft1, ft2):
     per_sample = np.sum(abs(ft1-ft2), axis=0)
     return np.average(per_sample)
 
+def get_samples(file):
+    wav, rate = librosa.core.load(file)
+    ft = get_ft(wav)
+    r = ft.real
+    i = ft.imag
+    # organized as bins, frames so we need to transpose first two axes to frames, bins
+    samples = np.empty((r.shape[1], r.shape[0],2))
+    samples[:,:,0] = r.T 
+    samples[:,:,1] = i.T
+    return samples 
+
+def rebuild_cqt(output):
+    cqt = output[:,:,0] + output[:,:,1] * 1j
+    return cqt.T
+    
 
 # Cruft to evaluate deleting
 #def filter(cqt):
