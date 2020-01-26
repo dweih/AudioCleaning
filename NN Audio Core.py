@@ -20,11 +20,11 @@ WINDOW_SIZE = 55  # Has to be odd
 TARGET_COL = WINDOW_SIZE//2
 
 # stft values
-N_FFT = 1024 # 512 recommended for speech, music typically 2048
-FFT_BINS = 513
+#N_FFT = 1024 # 512 recommended for speech, music typically 2048
+#FFT_BINS = 513
 
 # cqt values
-#FFT_BINS = 768 # function of items below
+FFT_BINS = 768 # function of items below
 HOP_LENGTH = 256
 
 BINS_PER_OCTAVE = 12 * 8
@@ -44,8 +44,8 @@ def rebuild_fft(output, original_fft):
     return vrect(mag, o_phase)
     
 def get_ft(wav):
-    #c = librosa.cqt(wav, hop_length=HOP_LENGTH, fmin=FMIN, n_bins=OCTAVES*BINS_PER_OCTAVE, bins_per_octave=BINS_PER_OCTAVE)
-    c = librosa.stft(wav, hop_length=HOP_LENGTH, n_fft=N_FFT)
+    c = librosa.cqt(wav, hop_length=HOP_LENGTH, fmin=FMIN, n_bins=OCTAVES*BINS_PER_OCTAVE, bins_per_octave=BINS_PER_OCTAVE)
+    #c = librosa.stft(wav, hop_length=HOP_LENGTH, n_fft=N_FFT)
     return c
 
 def get_ft_from_file(file):
@@ -54,8 +54,8 @@ def get_ft_from_file(file):
     return get_ft(wav)
 
 def inv_ft(ft):
-    #return librosa.icqt(ft, hop_length=HOP_LENGTH, fmin=FMIN, bins_per_octave=BINS_PER_OCTAVE)
-    return librosa.istft(ft, hop_length=HOP_LENGTH)
+    return librosa.icqt(ft, hop_length=HOP_LENGTH, fmin=FMIN, bins_per_octave=BINS_PER_OCTAVE)
+    #return librosa.istft(ft, hop_length=HOP_LENGTH)
 
 # This is an approximation - much better ways to compare voice quality exist, but this works fine
 def diff_ft(ft1, ft2):
