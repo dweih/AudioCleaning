@@ -12,6 +12,7 @@ import librosa
 import numpy as np
 import cmath
 import os
+import keras.backend as K
 
 # Constants and settings
 DTYPE = 'float32'
@@ -79,6 +80,24 @@ def rebuild_cqt(output):
     cqt = output[:,:,0] + output[:,:,1] * 1j
     return cqt.T
     
+
+def magnitude(X, axis):
+    X2 = K.square(X)
+    M2 = K.sum(X2, axis=axis, keepdims=True)
+    return K.sqrt(M2)
+
+# Punish this for being away from target magnitude
+# Magic number of 0.5 for relative importance of components vs. magnitude
+def magnitude_loss(y_actual, y_predicted):
+    ya_magnitude = magnitude(y_actual,2)
+    yp_magnitude = magnitude(y_predicted,2)
+    mag_loss = K.mean(K.square(ya_magnitude-yp_magnitude))
+    component_loss = K.mean(K.square(y_actual-y_predicted))
+    return mag_loss + 0.5 * component_loss
+
+# Solution for problems reimporting with custom loss function from https://github.com/keras-team/keras/issues/5916
+import keras.losses
+keras.losses.magnitude_loss = magnitude_loss
 
 # Cruft to evaluate deleting
 #def filter(cqt):
