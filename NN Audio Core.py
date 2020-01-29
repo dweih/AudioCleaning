@@ -65,19 +65,21 @@ def diff_ft(ft1, ft2):
     per_sample = np.sum(abs(ft1-ft2), axis=0)
     return np.average(per_sample)
 
+# Returns magnitude and phase
 def get_samples(file):
     wav, rate = librosa.core.load(file)
     ft = get_ft(wav)
-    r = ft.real
-    i = ft.imag
+    polar_vect = np.vectorize(cmath.polar)
+    M, P = polar_vect(ft)
     # organized as bins, frames so we need to transpose first two axes to frames, bins
-    samples = np.empty((r.shape[1], r.shape[0],2))
-    samples[:,:,0] = r.T 
-    samples[:,:,1] = i.T
+    samples = np.empty((M.shape[1],M.shape[0],2))
+    samples[:,:,0] = M.T 
+    samples[:,:,1] = P.T
     return samples 
 
 def rebuild_cqt(output):
-    cqt = output[:,:,0] + output[:,:,1] * 1j
+    rect_vect = np.vectorize(cmath.rect)
+    cqt = rect_vect(output[:,:,0], output[:,:,1])
     return cqt.T
     
 
