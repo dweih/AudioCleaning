@@ -42,7 +42,7 @@ def inv_ft(ft):
 
 # This is an approximation - much better ways to compare voice quality exist, but this works fine
 def diff_ft(ft1, ft2):
-    per_sample = np.sum(abs(ft1-ft2), axis=0)
+    per_sample = np.sum(abs(ft1[:,LOW_BIN:HIGH_BIN]-ft2[:,LOW_BIN:HIGH_BIN]), axis=0)
     return np.average(per_sample)
 
 
