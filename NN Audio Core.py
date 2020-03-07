@@ -53,7 +53,7 @@ def diff_ft(ft1, ft2):
 # High cut off bin 300 ~6500hz - 5000hz sounded OK, but keeping some just in case
 # These are based on N_FFT 1024
 LOW_BIN = 3 
-HIGH_BIN = 340
+HIGH_BIN = 280
 SAMPLE_BINS = HIGH_BIN-LOW_BIN
 
 freq = librosa.fft_frequencies(sr=22050, n_fft=N_FFT)
