@@ -41,9 +41,10 @@ def inv_ft(ft):
     return librosa.istft(ft, hop_length=HOP_LENGTH)
 
 # This is an approximation - much better ways to compare voice quality exist, but this works fine
+# This is for FT complex values - not samples and magnitudes!  
+# So format is bins, samples and we only pay attention to relevant ones
 def diff_ft(ft1, ft2):
-    per_sample = np.sum(abs(ft1[:,LOW_BIN:HIGH_BIN]-ft2[:,LOW_BIN:HIGH_BIN]), axis=0)
-    return np.average(per_sample)
+    return np.average(abs(ft1[LOW_BIN:HIGH_BIN,:]-ft2[LOW_BIN:HIGH_BIN,:]))
 
 
 ################################################################################
