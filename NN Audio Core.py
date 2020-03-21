@@ -15,7 +15,7 @@ import math
 import os
 
 # Constants and settings
-DTYPE = 'float32'
+DTYPE = 'complex64'
 
 WINDOW_SIZE = 55  # Has to be odd
 TARGET_COL = WINDOW_SIZE//2
@@ -26,7 +26,7 @@ FFT_BINS = 513
 
 HOP_LENGTH = 128 # Required for good round trip quality
 
-INPUT_DEPTH = 2
+INPUT_DEPTH = 1
 OUTPUT_DEPTH = 1
 OUTPUT_DTYPE = 'complex64'
 
@@ -134,26 +134,30 @@ def get_magnitude_samples(file):
 def get_samples(file):
     wav, rate = librosa.core.load(file)
     ft = get_ft(wav)
-    polar_vect = np.vectorize(cmath.polar)
-    M, P = polar_vect(ft)
+    return get_samples_from_ft(ft)
+
+def get_samples_from_ft(ft):
+    return np.reshape(ft.T[:,LOW_BIN:HIGH_BIN], (ft.shape[1],SAMPLE_BINS,INPUT_DEPTH))
+
+#    polar_vect = np.vectorize(cmath.polar)
+#    M, P = polar_vect(ft)
     # organized as bins, frames so we need to transpose first two axes to frames, bins
-    samples = np.empty((M.shape[1],M.shape[0],INPUT_DEPTH))
-    samples[:,:,0] = M.T 
-    samples[:,:,1] = P.T
-    return samples[:,LOW_BIN:HIGH_BIN,:]
+#    samples = np.empty((M.shape[1],M.shape[0],INPUT_DEPTH))
+#    samples[:,:,0] = M.T 
+#    samples[:,:,1] = P.T
+#    return samples[:,LOW_BIN:HIGH_BIN,:]
 
 def get_targets(file):
     wav, rate = librosa.core.load(file)
     ft = get_ft(wav)
     # organized as bins, frames so we need to transpose first two axes to frames, bins
-    return ft.T[:,LOW_BIN:HIGH_BIN]
+    return get_targets_from_ft(ft)
+
+def get_targets_from_ft(ft):
+    return np.reshape(ft.T[:,LOW_BIN:HIGH_BIN], (ft.shape[1],SAMPLE_BINS,OUTPUT_DEPTH))
 
 
-def rebuild_fft(samples, original_fft):
+def rebuild_fft(samples):
     fft = np.zeros((samples.shape[0], FFT_BINS))
-    fft[:,LOW_BIN:HIGH_BIN] = samples
-    vphase = np.vectorize(cmath.phase)
-    o_phase = vphase(original_fft)
-    mag = fft.T
-    vrect = np.vectorize(cmath.rect)
-    return vrect(mag, o_phase)
+    fft[:,LOW_BIN:HIGH_BIN] = np.reshape(samples, (samples.shape[0], SAMPLE_BINS))
+    return fft.T
