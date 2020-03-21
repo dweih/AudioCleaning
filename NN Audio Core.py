@@ -26,6 +26,10 @@ FFT_BINS = 513
 
 HOP_LENGTH = 128 # Required for good round trip quality
 
+INPUT_DEPTH = 2
+OUTPUT_DEPTH = 1
+OUTPUT_DTYPE = 'complex64'
+
 # Shared functions
 
 def get_ft(wav):
@@ -121,10 +125,29 @@ def sample_scale(pt):
 
 # Sample output is ft converted to magnitude and .T to get samples then ft
 # Only returns 'interesting' samples - between LOW_ and HIGH_ bins, so output shape is (sample_count, SAMPLE_BINS)
-def get_samples(file):
+def get_magnitude_samples(file):
     wav, rate = librosa.core.load(file)
     samples = abs(get_ft(wav).T) # organized as bins, frames so we need to transpose them to frames, bins
     return samples[:,LOW_BIN:HIGH_BIN]
+
+# ft returned as magnitude and phase
+def get_samples(file):
+    wav, rate = librosa.core.load(file)
+    ft = get_ft(wav)
+    polar_vect = np.vectorize(cmath.polar)
+    M, P = polar_vect(ft)
+    # organized as bins, frames so we need to transpose first two axes to frames, bins
+    samples = np.empty((M.shape[1],M.shape[0],INPUT_DEPTH))
+    samples[:,:,0] = M.T 
+    samples[:,:,1] = P.T
+    return samples[:,LOW_BIN:HIGH_BIN,:]
+
+def get_targets(file):
+    wav, rate = librosa.core.load(file)
+    ft = get_ft(wav)
+    # organized as bins, frames so we need to transpose first two axes to frames, bins
+    return ft.T[:,LOW_BIN:HIGH_BIN]
+
 
 def rebuild_fft(samples, original_fft):
     fft = np.zeros((samples.shape[0], FFT_BINS))
